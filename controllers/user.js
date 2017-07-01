@@ -1,0 +1,1 @@
+exports.details = function(req, res, next){};
