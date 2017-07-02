@@ -9,6 +9,7 @@ var compression = require('compression');
 var sassMiddleware = require('node-sass-middleware');
 var config = require('./config');
 var router = require('./router');
+require('./models');
 
 var app = express();
 

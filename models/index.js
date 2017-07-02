@@ -3,8 +3,9 @@ var config = require('../config');
 
 mongoose.connect(config.mongodb, function(err){
   if(err){
-    return console.error(`Can't connect to mongodb ${config.db}`, err);
+    return console.error(`Can't connect to mongodb ${config.mongodb}`, err);
   }
-  require('./User');
-  require('./Post');
+  require('./user');
+  require('./post');
+  console.log(`Connect to mongodb ${config.mongodb}`);
 });

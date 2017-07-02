@@ -1,5 +1,6 @@
-var config = require('../config');
 var request = require('request');
+var config = require('../config');
+var UserModel = require('../models/user');
 
 exports.oauthUrl = `http://github.com/login/oauth/authorize?client_id=${config.oauthClientId}&redirect_uri=${encodeURIComponent(config.oauthRedirectUri)}`;
 
@@ -27,7 +28,16 @@ exports.login = function (req, res, next) {
                     message: `Can't login `
                 });
             }
-            res.json(body);
+            UserModel.findOrCreateUser({
+                name: body.login,
+                avatarUrl: body.avatar_url
+            }, function(err, doc){
+                if(err){
+                    next(err);
+                }else{
+                    res.json(doc.toJSON())
+                }
+            });
         });
     });
 };
