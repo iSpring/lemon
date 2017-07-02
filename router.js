@@ -2,10 +2,12 @@ var express = require('express');
 var router = express.Router();
 var credential = require('./controllers/credential');
 
-router.get('/signup', credential.signupPage);
-router.post('/signup/submit', credential.signupSubmit);
-router.get('/signin', credential.signinPage);
-router.post('/signin/submit', credential.signinSubmit);
-router.post('/signout', credential.signout);
+router.get('/', function(req, res, next){
+    res.locals.oauthUrl = credential.oauthUrl;
+    res.render('index');
+});
+
+router.get('/login', credential.login);
+router.post('/logout', credential.logout);
 
 module.exports = router;

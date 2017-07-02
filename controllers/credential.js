@@ -1,14 +1,45 @@
-//show signup page
-exports.signupPage = function(req, res, next){};
+var config = require('../config');
+var request = require('request');
 
-//submit signup
-exports.signupSubmit = function(req, res, next){};
+exports.oauthUrl = `http://github.com/login/oauth/authorize?client_id=${config.oauthClientId}&redirect_uri=${encodeURIComponent(config.oauthRedirectUri)}`;
 
-//show signin page
-exports.signinPage = function(req, res, next){};
+exports.login = function (req, res, next) {
+    var url = `https://github.com/login/oauth/access_token?client_id=${config.oauthClientId}&client_secret=${config.oauthClientSecret}&code=${req.query.code}`;
+    request.post({
+        uri: url,
+        json: true
+    }, function (err, response, body) {
+        if (err || !response || !body || !body.access_token) {
+            return res.json({
+                message: `Can't login `
+            });
+        }
+        var userUrl = `https://api.github.com/user?access_token=${body.access_token}`;
+        request.get({
+            uri: userUrl,
+            json: true,
+            headers: {
+                'User-Agent': 'Node'
+            }
+        }, function (err, response, body) {
+            if (err || !response || !body) {
+                return res.json({
+                    message: `Can't login `
+                });
+            }
+            res.json(body);
+        });
+    });
+};
 
-//submit signin
-exports.signinSubmit = function(req, res, next){};
-
-//submit signout
-exports.signout = function(req, res, next){};
+exports.logout = function (req, res, next) {
+    req.session.destroy(function (err) {
+        if (err) {
+            return res.json({
+                message: "Can't logout"
+            });
+        }
+        res.clearCookie(config.sessionName);
+        res.redirect('/');
+    });
+};
