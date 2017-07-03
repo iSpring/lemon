@@ -1,8 +1,6 @@
 var mongoose = require('mongoose');
+var Post = require('./post');
 
-var User = null;
-
-//oauthName + oauthType = full name
 var UserSchema = new mongoose.Schema({
   name: {
     type: String, //Lemon_iSpring, GitHub_iSpring, WeChat_iSpring
@@ -12,9 +10,19 @@ var UserSchema = new mongoose.Schema({
   avatarUrl: {
     type: String,
     required: true
+  },
+  displayName: {
+    type: String,
+    required: true
+  },
+  isAdmin: {
+    type: Boolean,
+    required: false,
+    default: false
   }
 });
 
+//static methods
 UserSchema.statics.addUser = function (options, cb) {
   this.create(options, function (err, doc) {
     cb(err, doc);
@@ -45,6 +53,14 @@ UserSchema.statics.findOrCreateUser = function (options, cb) {
   })
 };
 
-User = mongoose.model('User', UserSchema);
+//instance methods
+UserSchema.methods.addPost = function(options, cb){
+  options.userId = this._id;
+  Post.addPost(options, function(err, doc){
+    cb(err, doc);
+  });
+};
+
+var User = mongoose.model('User', UserSchema);
 
 module.exports = User;

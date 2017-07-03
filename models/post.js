@@ -6,8 +6,18 @@ var PostSchema = new mongoose.Schema({
   },
   content: {
     type: String
+  },
+  userId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User'
   }
 });
+
+PostSchema.statics.addPost = function(options, cb){
+  this.create(options, function(err, doc){
+    cb(err, doc);
+  });
+};
 
 var Post = mongoose.model('Post', PostSchema);
 
