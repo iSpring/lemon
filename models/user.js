@@ -25,7 +25,7 @@ UserSchema.statics.findUserByName = function (name, cb) {
   this.findOne({
     name: name
   }, function (err, doc) {
-    cb(err, doc);
+    cb(err, doc);   
   });
 };
 

@@ -35,7 +35,13 @@ exports.login = function (req, res, next) {
                 if(err){
                     next(err);
                 }else{
-                    res.json(doc.toJSON())
+                    req.session.regenerate(function(err){
+                        if(err){
+                            return next(err);
+                        }
+                        req.session.name = doc.name;
+                        res.json(doc.toJSON());
+                    });
                 }
             });
         });

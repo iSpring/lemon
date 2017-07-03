@@ -41,13 +41,13 @@ app.use(session({
     pass: config.redisPassword
   })
 }));
-// app.use(function(req, res, next){
-//   if(!req.session){
-//     //lose connection to Redis and get request when auto-reconnect to Redis
-//     return next(new Error("req.session is null"));
-//   }
-//   next();
-// });
+app.use(function(req, res, next){
+  if(!req.session){
+    //lose connection to Redis and get request when auto-reconnect to Redis
+    return next(new Error('req.session is null'));
+  }
+  next();
+});
 // app.use(sassMiddleware({
 //   src: path.join(__dirname, 'public'),
 //   dest: path.join(__dirname, 'public'),
