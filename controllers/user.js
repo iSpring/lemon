@@ -1,9 +1,9 @@
-var user = require('../models/user');
+var User = require('../models/user');
 
 module.exports = function (router) {
     //all users
     router.get('/user/all', function (req, res, next) {
-        user.find({}, function (err, docs) {
+        User.find({}, function (err, docs) {
             if (err) {
                 next(err);
             } else {
@@ -17,7 +17,7 @@ module.exports = function (router) {
 
     //user detail
     router.get('/user/:name', function (req, res, next) {
-        user.findUserByName(req.params.name, function (err, doc) {
+        User.findUserByName(req.params.name, function (err, doc) {
             if (err) {
                 next(err);
             } else {
@@ -34,7 +34,7 @@ module.exports = function (router) {
 
     //remove all users
     router.get('/user/remove/all', function (req, res, next) {
-        user.remove({}, function (err, count) {
+        User.remove({}, function (err, count) {
             if (err) {
                 next(err);
             } else {
@@ -47,7 +47,7 @@ module.exports = function (router) {
 
     //remove user
     router.get('/user/remove/:name', function (req, res, next) {
-        user.remove({
+        User.remove({
             name: req.params.name
         }, function (err) {
             if (err) {
@@ -62,7 +62,7 @@ module.exports = function (router) {
 
     //add post
     router.get('/user/addpost', function (req, res, next) {
-        user.addPost({
+        User.addPost({
             title: req.query.title,
             content: req.query.content,
             userId: req.session.userId

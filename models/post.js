@@ -13,6 +13,7 @@ var PostSchema = new mongoose.Schema({
   }
 });
 
+//static methods
 PostSchema.statics.addPost = function(options, cb){
   this.create(options, function(err, doc){
     cb(err, doc);

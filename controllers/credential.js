@@ -1,6 +1,6 @@
 var request = require('request');
 var config = require('../config');
-var UserModel = require('../models/user');
+var User = require('../models/user');
 
 module.exports = function (router) {
     router.get('/login', function (req, res, next) {
@@ -27,7 +27,7 @@ module.exports = function (router) {
                         message: `Can't login `
                     });
                 }
-                UserModel.findOrCreateUser({
+                User.findOrCreateUser({
                     name: `GitHub_${body.login}`,
                     avatarUrl: body.avatar_url,
                     displayName: body.login
