@@ -3,10 +3,10 @@ var User = require('../models/user');
 var Post = require('../models/post');
 var Reply = require('../models/reply');
 
+//access /test/data to import CNode.js data
+
 //https://cnodejs.org/api/v1/topics
-
 //https://cnodejs.org/api/v1/user/lellansin
-
 //https://cnodejs.org/api/v1/topic/5433d5e4e737cbe96dcef312
 
 module.exports = function (router) {
