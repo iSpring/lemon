@@ -24,7 +24,7 @@ module.exports = function (router) {
             }, function (err, response, body) {
                 if (err || !response || !body) {
                     return res.json({
-                        message: `Can't login `
+                        message: `Can't login`
                     });
                 }
                 User.findOrCreateUser({
@@ -46,7 +46,7 @@ module.exports = function (router) {
                                 displayName: doc.displayName,
                                 isAdmin: doc.isAdmin
                             };
-                            res.json(doc.toJSON());
+                            res.redirect('/');
                         });
                     }
                 });

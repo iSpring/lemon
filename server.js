@@ -1,3 +1,6 @@
+require('./models');//make sure require models first because we need to set global plugin
+var config = require('./config');
+var router = require('./router');
 var express = require('express');
 var path = require('path');
 var favicon = require('serve-favicon');
@@ -7,11 +10,12 @@ var session = require('express-session');
 var bodyParser = require('body-parser');
 var compression = require('compression');
 var sassMiddleware = require('node-sass-middleware');
-var config = require('./config');
-var router = require('./router');
-require('./models');
 
 var app = express();
+
+app.locals.title = 'lemon技术社区';
+
+app.set('port', process.env.PORT || 3000);
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -76,8 +80,8 @@ app.use(function(err, req, res, next) {
   res.render('error');
 });
 
-app.listen(3344, function(){
-  console.log('lemon listening on port 3344...');
+app.listen(app.get('port'), function(){
+  console.log(`lemon listening on port ${app.get('port')}...`);
 });
 
 module.exports = app;

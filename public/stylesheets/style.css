@@ -1,8 +1,19 @@
-body {
-  padding: 50px;
-  font: 14px "Lucida Grande", Helvetica, Arial, sans-serif; }
+html,body{
+  margin: 0;
+  padding: 0;
+  width: 100%;
+}
 
-a {
-  color: #00B7FF; }
+ul{
+  margin: 0;
+  padding: 0;
+}
 
-/*# sourceMappingURL=style.css.map */
+body{
+  background-color: #E1E1E1;
+}
+
+#header{
+  height: 50px;
+  background-color: #444444;
+}

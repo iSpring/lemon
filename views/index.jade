@@ -2,9 +2,9 @@ extends layout
 
 block content
   h1= title
-  p Welcome to #{title}
-  if userName
-    p user name #{userName}
+  if user
+    p Welcome, #{user.name} !
+    a(href='/logout') Logout
   else
-    a(href='#{oauthUrl}', target='_self') Loginin by GitHub
+    a(href='#{oauthUrl}') Loginin
   

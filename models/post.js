@@ -1,6 +1,11 @@
 var mongoose = require('mongoose');
 
 var PostSchema = new mongoose.Schema({
+  type: {
+    type: String,
+    required: true,
+    enum: ['share', 'ask', 'job']
+  },
   title: {
     type: String
   },
@@ -10,6 +15,10 @@ var PostSchema = new mongoose.Schema({
   userId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User'
+  },
+  good: {
+    type: Boolean,
+    default: false
   }
 });
 

@@ -8,7 +8,7 @@ var config = {
   sessionSecret: 'lemon.session.secret',
   oauthClientId: 'fd08e7c7b36f2aec821d',
   oauthClientSecret: 'a46a9b1e29ff9457e9ff6ece6635719232e4b78c',
-  oauthRedirectUri: 'http://localhost:3344/login'
+  oauthRedirectUri: 'http://localhost:3000/login'
 };
 
 module.exports = config;
