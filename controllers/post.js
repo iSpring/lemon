@@ -4,11 +4,12 @@ var Auth = require('../middlewares/auth');
 module.exports = function(router){
     /**
      * add new post
-     * query: {title,content}
+     * query: {type,title,content}
      */
     router.get('/post/new', Auth.userRequired, function(req, res, next){
         Post.addPost({
-            userId: req.session.user._id,
+            user: req.session.user._id,
+            type: req.query.type,
             title: req.query.title,
             content: req.query.content
         }, function(err, doc){
@@ -59,9 +60,10 @@ module.exports = function(router){
 
     /**
      * show post detail
+     * query: {full}
      */
     router.get('/post/:id', function(req, res, next){
-        Post.findById(req.params.id, function(err, doc){
+        function callback(err, doc){
             if(err){
                 next(err);
             }else{
@@ -70,7 +72,12 @@ module.exports = function(router){
                     post: doc.toJSON()
                 });
             }
-        });
+        }
+        if(req.query.full === 'true'){
+            Post.getFullPostById(req.params.id, callback);
+        }else{
+            Post.getPostById(req.params.id, callback);
+        }
     });
 
     /**

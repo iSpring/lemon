@@ -1,24 +1,40 @@
 var mongoose = require('mongoose');
+var Reply = require('./reply');
 
 var PostSchema = new mongoose.Schema({
   type: {
     type: String,
-    required: true,
-    enum: ['share', 'ask', 'job']
+    enum: ['share', 'ask', 'job'],
+    required: true
   },
   title: {
-    type: String
+    type: String,
+    required: true
   },
   content: {
-    type: String
+    type: String,
+    required: true
   },
-  userId: {
+  user: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'User'
+    ref: 'User',
+    required: true
   },
   good: {
     type: Boolean,
     default: false
+  },
+  top:{
+    type: Boolean,
+    default: false
+  },
+  visitCount: {
+    type: Number,
+    default: 0
+  },
+  replyCount: {
+    type: Number,
+    default: 0
   }
 });
 
@@ -26,6 +42,31 @@ var PostSchema = new mongoose.Schema({
 PostSchema.statics.addPost = function(options, cb){
   this.create(options, function(err, doc){
     cb(err, doc);
+  });
+};
+
+PostSchema.statics.getPostById = function(id, cb){
+  return this.findById(id, function(err, doc){
+    cb(err, doc);
+  });
+};
+
+PostSchema.statics.getFullPostById = function(id, cb){
+  return this.findById(id).populate('user').exec(function(err, doc){
+    cb(err, doc);
+  });
+};
+
+
+//instance methods
+PostSchema.methods.addReply = function(options, cb){
+  Reply.addReply(options, (err) => {
+    if(err){
+      cb(err);
+    }else{
+      this.replyCount += 1;
+      this.save(cb);
+    }
   });
 };
 
