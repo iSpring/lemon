@@ -4,6 +4,7 @@ var config = require('../config');
 mongoose.plugin(require('./plugin'));
 require('./user');
 require('./post');
+require('./reply');
 
 mongoose.connect(config.mongodb, function(err){
   if(err){
