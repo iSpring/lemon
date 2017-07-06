@@ -1,13 +1,15 @@
 var request = require('request');
+var async = require('async');
 var User = require('../models/user');
 var Post = require('../models/post');
 var Reply = require('../models/reply');
 
-//access /test/data to import CNode.js data
+//access http://localhost:3000/test/data?markdown=true to import CNode.js data
 
 //https://cnodejs.org/api/v1/topics
 //https://cnodejs.org/api/v1/user/lellansin
 //https://cnodejs.org/api/v1/topic/5433d5e4e737cbe96dcef312
+//https://cnodejs.org/api/v1/topic/5433d5e4e737cbe96dcef312?mdrender=true
 
 module.exports = function (router) {
     function getAllUsers(data) {
@@ -49,7 +51,7 @@ module.exports = function (router) {
         });
         return promise;
     }
-    
+
 
     /**
      * 爬取CNodejs.org论坛数据
@@ -58,26 +60,55 @@ module.exports = function (router) {
     router.get('/test/data', function (req, res, next) {
         var limit = req.query.limit || 100;
         var mdrender = req.query.markdown !== 'true';
-        testData(limit, mdrender).then(function () {
-            res.redirect('/user/all');
+        testData(limit, mdrender, res).then(function () {
+            res.write('all done\n');
+            res.end();
         }, function (err) {
             next(err);
         });
     });
 
-    function testData(limit, mdrender) {
+    function testData(limit, mdrender, res) {
         var topics = null;
         return fetchData(limit, mdrender).then(function (_topics) {
+            res.write('fetchData done\n');
             topics = _topics;
             return removeAll();
         }).then(function () {
+            res.write('removeAll done\n');
             return createUsers(topics);
-        }).then(function(){
+        }).then(function () {
+            res.write('createUsers done\n');
             return createPosts(topics);
-        }).then(function(postDocs){
-            var topicId = topics[0].id;
-            var postDoc = postDocs[0];
-            return parseSingleTopic(topicId, postDoc);
+        }).then(function (postDocs) {
+            res.write('createPosts done\n');
+            // var topicId = topics[0].id;
+            // var postDoc = postDocs[0];
+            // return parseSingleTopic(topicId, postDoc);
+
+            return new Promise(function (resolve, reject) {
+                var tasks = topics.map(function (topic, index) {
+                    var topicId = topic.id;
+                    var postDoc = postDocs[index];
+                    return function (cb) {
+                        parseSingleTopic(topicId, postDoc, mdrender).then(function () {
+                            res.write(`parseSingleTopic ${topicId} done\n`)
+                            cb(null);
+                        }, function (err) {
+                            res.write(`parseSingleTopic ${topicId} error\n`)
+                            cb(null);
+                        });
+                    };
+                });
+
+                async.series(tasks, function(err, cb){
+                    if(err){
+                        reject(err);
+                    }else{
+                        resolve();
+                    }
+                });
+            });
         });
     }
 
@@ -123,7 +154,7 @@ module.exports = function (router) {
                 });
             }
         });
-        return User.create(users).then(function(docs){
+        return User.create(users).then(function (docs) {
             topics.nameUserObj = {};
             docs.forEach(function (user) {
                 topics.nameUserObj[user.name] = user;
@@ -151,46 +182,46 @@ module.exports = function (router) {
 
     /*---------------------------------------parse one topic page------------------------*/
 
-    function parseSingleTopic(topicId, postDoc){
-        var nameUserObj = {};//{name: user}
-        return fetchSingleTopic(topicId).then(function(topicDetail){
+    function parseSingleTopic(topicId, postDoc, mdrender) {
+        var nameUserObj = {}; //{name: user}
+        return fetchSingleTopic(topicId, mdrender).then(function (topicDetail) {
             //topicDetail is the data of https://cnodejs.org/api/v1/topic/5433d5e4e737cbe96dcef312
             var uniqueNamesObj = {};
             var uniqueAuthors = [];
             var authors = [topicDetail.author];
-            topicDetail.replies.forEach(function(reply){
+            topicDetail.replies.forEach(function (reply) {
                 authors.push(reply.author);
-            });            
-            authors.forEach(function(author){
-                if(!uniqueNamesObj[author.loginname]){
+            });
+            authors.forEach(function (author) {
+                if (!uniqueNamesObj[author.loginname]) {
                     uniqueNamesObj[author.loginname] = true;
                     uniqueAuthors.push(author);
                 }
             });
             //should serial execution
-            var defs = uniqueAuthors.map(function(author){
+            var defs = uniqueAuthors.map(function (author) {
                 return findOrCreateUser(author);
             });
-            return Promise.all(defs).then(function(userDocs){
-                userDocs.forEach(function(userDoc){
+            return Promise.all(defs).then(function (userDocs) {
+                userDocs.forEach(function (userDoc) {
                     nameUserObj[userDoc.name] = userDoc;
                 });
                 return topicDetail;
             });
-        }).then(function(topicDetail){
-            var defs = topicDetail.replies.map(function(replyItem){
+        }).then(function (topicDetail) {
+            var defs = topicDetail.replies.map(function (replyItem) {
                 return addReply(replyItem, postDoc._id, nameUserObj);
             });
-            if(defs.length > 0){
+            if (defs.length > 0) {
                 return Promise.all(defs);
             }
         });
     }
 
-    function fetchSingleTopic(topicId){
+    function fetchSingleTopic(topicId, mdrender) {
         var promise = new Promise(function (resolve, reject) {
-            //https://cnodejs.org/api/v1/topic/5433d5e4e737cbe96dcef312
-            var url = `https://cnodejs.org/api/v1/topic/${topicId}`;
+            //https://cnodejs.org/api/v1/topic/5433d5e4e737cbe96dcef312?mdrender=fasle
+            var url = `https://cnodejs.org/api/v1/topic/${topicId}?mdrender=${mdrender}`;
             request.get({
                 uri: url,
                 json: true
@@ -205,25 +236,25 @@ module.exports = function (router) {
         return promise;
     }
 
-    function findOrCreateUser(author){
+    function findOrCreateUser(author) {
         var options = {
             name: author.loginname,
             avatarUrl: author.avatar_url,
             displayName: author.loginname,
             signature: `我是${author.loginname}`
         };
-        return new Promise(function(resolve, reject){
-            User.findOrCreateUser(options, function(err, user){
-                if(err){
+        return new Promise(function (resolve, reject) {
+            User.findOrCreateUser(options, function (err, user) {
+                if (err) {
                     reject(err);
-                }else{
+                } else {
                     resolve(user);
                 }
             });
         });
     }
 
-    function addReply(replyItem, myPostId, nameUserObj){
+    function addReply(replyItem, myPostId, nameUserObj) {
         var date = new Date(replyItem.create_at);
         var options = {
             user: nameUserObj[replyItem.author.loginname]._id,
@@ -267,12 +298,12 @@ module.exports = function (router) {
         });
     }
 
-    function removeAllReplies(){
-        return new Promise(function(resolve, reject){
-            Reply.remove({}, function(err){
-                if(err){
+    function removeAllReplies() {
+        return new Promise(function (resolve, reject) {
+            Reply.remove({}, function (err) {
+                if (err) {
                     reject(err);
-                }else{
+                } else {
                     resolve();
                 }
             });
