@@ -1,21 +1,16 @@
-﻿import React from 'react';
+﻿import React, { Component } from 'react';
 import ReactDOM from 'react-dom';
+import { Provider } from 'react-redux';
+import Root from './Root';
+import configStore from './common/configStore';
 
-function formatName(user) {
-  return user.firstName + ' ' + user.lastName;
-}
-
-const user = {
-  firstName: 'Harper',
-  lastName: 'Perez'
-};
-
-const element = (
-  <h1>
-    Hello, {formatName(user)}!
-  </h1>
-);
+const store = configStore();
 
 const rootDiv = document.getElementById("root");
 
-ReactDOM.render(element, rootDiv);
+ReactDOM.render(
+  <Provider store={store}>
+    <Root />
+  </Provider>, 
+  rootDiv
+);

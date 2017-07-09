@@ -6,23 +6,18 @@ var ExtractTextWebpackPlugin = require('extract-text-webpack-plugin');
 
 var extractPlugin = new ExtractTextWebpackPlugin('[name].[contenthash].css');
 
-var WebpackMd5Hash = require('webpack-md5-hash');
-// var webpackMd5HashPlugin = new WebpackMd5Hash();
-
 var HtmlWebpackPlugin = require('html-webpack-plugin');
 
 var htmlWebpackPlugin = new HtmlWebpackPlugin({
-    filename: './webapp.html',
-    template: '!!ejs!./src/webapp/template.html',
+    filename: './index.html',
+    template: '!!ejs-loader!./app/template.ejs',
     hash: false,
-    inject: 'body',
-    // chunks: ["runtime", "webapp", "globe"]
-    chunks: ["webapp"]
+    inject: 'body'
 });
 
 var buildFolder = 'buildOutput';
 
-var PRODUCTION = process.env.NODE_ENV === 'production';
+var isProd = process.env.NODE_ENV === 'production';
 
 var es6Promise = './node_modules/es6-promise/dist/es6-promise.auto.min.js';
 
@@ -36,12 +31,13 @@ module.exports = {
         devtoolModuleFilenameTemplate: 'webpack:///[absolute-resource-path]'
     },
 
-    // devtool: PRODUCTION ? 'hidden-source-map' : 'cheap-module-eval-source-map'
-    devtool: PRODUCTION ? false : 'source-map',
+    // devtool: isProd ? 'hidden-source-map' : 'cheap-module-eval-source-map'
+    devtool: isProd ? false : 'source-map',
 
     resolve: {
-        extensions: ['', '.webpack.js', '.web.js', '.js', '.jsx', '.scss', '.png'],
+        extensions: ['.webpack.js', '.web.js', '.js', '.jsx', '.scss', '.png'],
         alias: {
+            features: path.join(__dirname, 'app/features')
         }
     },
 
@@ -51,14 +47,9 @@ module.exports = {
                 use: {
                     loader: 'babel-loader',
                     options: {
-                        presets: ['es2015', 'react'],
-                        plugins: ['transform-class-properties']
+                        presets: ['es2015', 'react', 'react-hmre'],
+                        plugins: ['transform-class-properties', 'transform-object-rest-spread']
                     }
-                }
-            }, {
-                test: /\.scss$/,
-                use: {
-                    loader: extractPlugin.extract('css?modules&localIdentName=[name]__[local]___[hash:base64:5]!sass')
                 }
             }, {
                 test: /\.(png|jpeg|jpg)$/,
@@ -76,10 +67,18 @@ module.exports = {
 
     plugins: [
         extractPlugin,
-        webpackMd5HashPlugin,
         htmlWebpackPlugin
     ]
 };
+
+// {
+//                 test: /\.scss$/,
+//                 use: extractPlugin.extract({
+//                     use: {
+//                         loader: 'css-loader?modules&localIdentName=[name]__[local]___[hash:base64:5]!sass-loader'
+//                     }
+//                 })
+//             },
 
 if (process.argv.indexOf("--ci") >= 0) {
     //https://github.com/webpack/webpack/issues/708
@@ -105,7 +104,7 @@ if (process.argv.indexOf("--ci") >= 0) {
     );
 }
 
-if (PRODUCTION) {
+if (isProd) {
     module.exports.plugins.push(
         new webpack.DefinePlugin({
             'process.env': {
