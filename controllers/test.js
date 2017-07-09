@@ -82,9 +82,6 @@ module.exports = function (router) {
             return createPosts(topics);
         }).then(function (postDocs) {
             res.write('createPosts done\n');
-            // var topicId = topics[0].id;
-            // var postDoc = postDocs[0];
-            // return parseSingleTopic(topicId, postDoc);
 
             return new Promise(function (resolve, reject) {
                 var tasks = topics.map(function (topic, index) {
