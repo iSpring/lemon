@@ -59,6 +59,7 @@ app.use(function(req, res, next){
 //   sourceMap: true
 // }));
 app.use('/public', express.static(path.join(__dirname, 'public')));
+app.use('/buildOutput', express.static(path.join(__dirname, 'buildOutput')));
 
 app.use('/', router);
 
