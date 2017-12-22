@@ -29,7 +29,7 @@ app.use(logger('dev', {
   }
 }));
 app.use(bodyParser.json({limit: '1mb'}));
-app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(compression());
 var RedisStore = require('connect-redis')(session);
